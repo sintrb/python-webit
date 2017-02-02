@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		<meta name="viewport" content="width=device-width,height=device-height,maximum-scale=1.0,user-scalable=no">
+		<link rel="stylesheet" type="text/css" href="/static/style.css">
+		<script src="/static/jquery.min.js"></script>
+		<script src="/static/vue.min.js"></script>
+
+		<!-- 最新版本的 Bootstrap 核心 CSS 文件 -->
+		<link rel="stylesheet" href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+		<!-- 可选的 Bootstrap 主题文件（一般不用引入） -->
+		<link rel="stylesheet" href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+
+		<!-- 最新的 Bootstrap 核心 JavaScript 文件 -->
+		<script src="https://cdn.bootcss.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+		<title>WebIT</title>
+		<style type="text/css">
+
+		</style>
+	</head>
+	<body style="padding: 10px;">
+		<div id="app" v-cloak>
+			<div style="margin: 5px 0;">
+				<button type="button" class="btn btn-primary" v-on:click="loadconfig();">Load</button>
+				<button type="button" class="btn btn-primary" v-on:click="saveconfig();">Save</button>
+			</div>
+			<div>
+				<table class="table table-bordered col-sm-6">
+					<tr v-for="s in config.shells">
+						<td style="width: 100px;"><pre>{{s.name}}</pre></td>
+						<td><pre>{{s.script}}</pre></td>
+						<td><button type="button" class="btn btn-primary" v-on:click="shell=s">Edit</button><button type="button" class="btn btn-danger">Run</button></td>
+					</tr>
+				</table>
+				<form class="form-horizontal col-sm-6" v-if="shell">
+					<div class="form-group">
+						<label class="col-sm-2 control-label">Name</label>
+						<div class="col-sm-10">
+							<input type="text" class="form-control" v-model="shell.name">
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="col-sm-2 control-label">Name</label>
+						<div class="col-sm-10">
+							<textarea class="form-control" rows="20" v-model="shell.script" style="margin-bottom: 5px;"></textarea>
+							<button type="button" class="btn btn-danger">Run</button>
+						</div>
+					</div>
+				</form>
+			</div>
+
+		</div>
+<script>
+	var B = {
+		done:function(){
+
+		},
+		doing:function(d){
+
+		},
+		msg:function(m,s){
+			alert(m+": "+s);
+		}
+	};
+	B.doapi = function(m, p, succ, fail){
+		if(!p)
+			p = {};
+		if(B.DEBUG){
+			console.log(p);
+		}
+		$.ajax({
+			url:'/api/'+m,
+			// type:B.DEBUG?'GET':'POST',
+			dataType:'JSON',
+			data:p,
+			success:function(res){
+				if(res.code == 0){
+					if(succ)
+						succ(res);
+				}
+				else{
+					B.done();
+					if(fail){
+						if(!fail(res))
+							B.msg("Error", res.msg, "error");
+					}
+					else{
+						if(!succ || !succ(null))
+							B.msg("Error", res.msg, "error");
+					}
+				}
+			},
+			error:function(e){
+				B.done();
+				if(fail)
+					fail(e);
+				else if(succ){
+					console.log(e);
+					B.msg("Error", "Network error!");
+					succ(null);
+				}
+			}
+		});
+	};
+	var app = new Vue({
+		el: '#app',
+		data: {
+			shell:null,
+			config:{
+				shells:[]
+			}
+		},
+		methods: {
+			loadconfig: function() {
+				B.doing("loadding...");
+				B.doapi('loadconfig',{},function(res){
+					if(res && res.data){
+						app.$data.config = res.data;
+					}
+					B.done();
+				});
+			},
+			saveconfig: function() {
+				B.doing("saving...");
+				B.doapi('saveconfig',{config:JSON.stringify(app.$data.config)},function(res){
+					if(res && res.data){
+						app.$data.shell = null;
+					}
+					B.done();
+				});
+			}
+		}
+	});
+	$(function(){
+		app.loadconfig();
+	});
+</script>
+	</body>
+</html>
