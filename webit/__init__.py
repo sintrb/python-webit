@@ -1,3 +1,2 @@
-from webit.webit import FileExplorer
 
-__alll__ = ['FileExplorer', 'wsgi']
+__alll__ = ['webit', 'wsgi']

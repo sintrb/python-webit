@@ -1,2 +1,2 @@
 include *.rst
-recursive-include PrintOnline *.*
+recursive-include webit *.*

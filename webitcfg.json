@@ -1,1 +1,1 @@
-{"shells": [{"name": "", "script": ""}, {"name": "\u52a0\u8f7d2", "script": "echo hellox"}]}
+{"shells": [{"name": "Ping", "script": "ping 172.16.1.1 -t 2"}, {"name": "Test", "script": "echo 'xxx'\nsleep 1\necho 'dddx'"}]}

@@ -23,7 +23,7 @@ if can't find webit command, try:
  python -m webit
 
 
-open broswer with url **http://127.0.0.1:8000**, upload file and print it.
+open broswer with url **http://127.0.0.1:8000**, add shell script and run it.
 
 
 Other tips

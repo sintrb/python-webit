@@ -11,7 +11,7 @@ This module refer to SimpleHTTPServer
 """
 
 
-__version__ = "0.0.1"
+__version__ = "0.0.3"
 
 import BaseHTTPServer
 import SocketServer
@@ -21,7 +21,6 @@ import shutil
 import socket
 import sys
 import urlparse
-import cgi
 import re
 import inspect
 import tempfile
@@ -41,7 +40,7 @@ if not libdir:
 
 options = {
         'workdir':os.getcwd(),
-        'tempdir':os.path.join(tempfile.gettempdir(), 'printonlie'),
+        'tempdir':os.path.join(tempfile.gettempdir(), 'webit'),
         'bind':'0.0.0.0',
         'cfgfile':'webitcfg.json',
         'port':8000
@@ -87,6 +86,13 @@ class WebItRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         config = json.loads(config)
         with open(options.get('cfgfile'), 'wb') as f:
             json.dump(config, f)
+    def api_runscript(self, script):
+        import commands
+        (status, output) = commands.getstatusoutput(script)
+        return {
+                'status':status,
+                'output':output
+            }
     
     def do_GET(self):
         if not self.check_auth():
@@ -176,7 +182,7 @@ def start():
 
 def config(argv):
     import getopt
-    opts, args = getopt.getopt(argv, "u:p:r:ht:d:c")
+    opts, args = getopt.getopt(argv, "u:p:r:ht:d:c:")
     for opt, arg in opts:
         if opt == '-u':
             options['username'] = arg
